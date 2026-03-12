@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Discovery Questionnaire</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Source+Sans+3:wght@300;400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #faf8f4;
+    --dark: #1a1a1a;
+    --mid: #444;
+    --light: #888;
+    --border: #ddd;
+    --accent: #2c5f8a;
+    --accent-light: #e8f0f7;
+    --success: #2a7a4b;
+  }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--dark);
+    color: white;
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+  }
+  .header-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 0.8rem;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 400;
+    margin-bottom: 1rem;
+  }
+  .header p {
+    color: #bbb;
+    max-width: 560px;
+    margin: 0 auto;
+    font-size: 0.95rem;
+    font-weight: 300;
+  }
+
+  /* PROGRESS */
+  .progress-bar {
+    background: #333;
+    height: 4px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s ease;
+  }
+
+  /* SECTION TABS */
+  .tabs-wrapper {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    overflow-x: auto;
+  }
+  .tabs {
+    display: flex;
+    min-width: max-content;
+    padding: 0 1rem;
+  }
+  .tab {
+    padding: 1rem 1.2rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--light);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    border: none;
+    background: none;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--accent); }
+  .tab.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+  .tab.completed { color: var(--success); }
+  .tab .check { margin-right: 0.3rem; }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  /* SECTION */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-icon {
+    font-size: 2rem;
+    background: var(--accent-light);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--dark);
+  }
+  .section-title p {
+    font-size: 0.88rem;
+    color: var(--light);
+    margin-top: 0.2rem;
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1.2rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .question-card:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.08);
+  }
+  .question-label {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    align-items: flex-start;
+  }
+  .q-number {
+    background: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+    letter-spacing: 0;
+  }
+  .q-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark);
+    line-height: 1.5;
+  }
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 0.92rem;
+    color: var(--dark);
+    resize: vertical;
+    transition: border-color 0.2s;
+    background: #fafafa;
+    line-height: 1.6;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: white;
+  }
+  textarea::placeholder { color: #bbb; }
+
+  /* CLIENT INFO */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+  .info-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .info-group label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); }
+  .info-group input {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.7rem 0.9rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    background: white;
+  }
+  .info-group input:focus { outline: none; border-color: var(--accent); }
+
+  /* NAV BUTTONS */
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    gap: 1rem;
+  }
+  .btn {
+    padding: 0.75rem 1.8rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+  }
+  .btn-secondary {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--mid);
+  }
+  .btn-secondary:hover { border-color: var(--mid); color: var(--dark); }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: #1e4a6e; }
+  .btn-submit {
+    background: var(--success);
+    color: white;
+    font-size: 0.9rem;
+    padding: 1rem 2.5rem;
+  }
+  .btn-submit:hover { background: #1e5c38; }
+
+  /* REVIEW SECTION */
+  .review-section { margin-bottom: 2.5rem; }
+  .review-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .review-item { margin-bottom: 1rem; }
+  .review-q { font-size: 0.82rem; font-weight: 600; color: var(--light); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+  .review-a { font-size: 0.95rem; color: var(--dark); white-space: pre-wrap; }
+  .review-a.empty { color: #bbb; font-style: italic; }
+
+  /* SUCCESS */
+  .success-message {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+  .success-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+  .success-message h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: var(--success);
+  }
+  .success-message p { color: var(--mid); max-width: 480px; margin: 0 auto 0.5rem; }
+
+  /* SECTION COUNTER */
+  .section-counter {
+    font-size: 0.8rem;
+    color: var(--light);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-counter span { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Automation Agency — Confidential</div>
+  <h1>Client Discovery Questionnaire</h1>
+  <p>Please answer each question as thoroughly as possible. Your responses help us identify the best automation opportunities for your business.</p>
+</div>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs" id="tabsContainer"></div>
+</div>
+
+<div class="main" id="mainContent">
+  <!-- Sections injected by JS -->
+</div>
+
+<div class="main success-message" id="successMessage">
+  <div class="success-icon">✅</div>
+  <h2>Thank You!</h2>
+  <p>Your discovery questionnaire has been submitted successfully.</p>
+  <p>We'll review your responses and be in touch shortly to discuss your automation strategy.</p>
+</div>
+
+<script>
+// ⚠️ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW (see setup instructions)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2bRWOxWanv5b52T8DBxHMM61mRebQMnLDPSfzkR_ZcwXfUtxgaaFqavRlE4fIjPnONw/exec";
+
+const sections = [
+  {
+    id: "info",
+    title: "Your Info",
+    icon: "👤",
+    subtitle: "Tell us about you and your business",
+    isInfo: true,
+    fields: [
+      { id: "name", label: "Your Full Name", placeholder: "Jane Smith" },
+      { id: "company", label: "Company Name", placeholder: "Acme Corp" },
+      { id: "email", label: "Your Email Address", placeholder: "jane@acmecorp.com" },
+      { id: "phone", label: "Phone Number", placeholder: "(555) 000-0000" },
+      { id: "industry", label: "Industry / Niche", placeholder: "e.g. Real Estate, Legal, Marketing Agency" },
+      { id: "team_size", label: "Team Size", placeholder: "e.g. Solo, 2–5, 6–20, 20+" },
+    ]
+  },
+  {
+    id: "workflow",
+    title: "Workflows",
+    icon: "⏱",
+    subtitle: "Where your time is going",
+    questions: [
+      "Walk me through the single process in your business that eats the most time each week. Be specific — what triggers it, what steps happen, and who's involved?",
+      "How many hours per week does your team spend on repetitive, copy-paste, or data entry tasks?",
+      "Are there any tasks that require someone to be physically at a computer but feel like they could be automated? Describe them.",
+      "What's the first thing you or your team does every morning when they open their computer?",
+      "What tasks are most likely to cause errors or require double-checking before completion?",
+    ]
+  },
+  {
+    id: "onboarding",
+    title: "Onboarding",
+    icon: "🚀",
+    subtitle: "How new clients enter your world",
+    questions: [
+      "Walk me step-by-step through what happens the moment a new client says 'yes' — from that point to their first deliverable.",
+      "What documents, contracts, or forms does a new client need to sign or fill out, and how do you currently send and receive them?",
+      "How do you collect information from a new client (intake forms, calls, emails)? Where does that info live after you collect it?",
+      "How long does your full onboarding process take from signed contract to project kickoff?",
+      "What's the most common bottleneck or delay in getting a new client fully onboarded?",
+    ]
+  },
+  {
+    id: "software",
+    title: "Software",
+    icon: "🛠",
+    subtitle: "Your tools and tech stack",
+    questions: [
+      "List every application your team uses in a typical workweek (project management, communication, billing, file storage, etc.).",
+      "Which of those tools currently talk to each other via integrations, and which ones require manual copy-pasting between them?",
+      "Do you have a CRM? If so, which one, and how consistently does your team actually use it?",
+      "Where do leads first enter your system (website form, email, social media, phone call, referral)?",
+      "Do you use any tools for e-signatures, proposals, or invoicing? If so, which ones?",
+    ]
+  },
+  {
+    id: "crm",
+    title: "CRM & Sales",
+    icon: "📊",
+    subtitle: "Your pipeline and follow-up process",
+    questions: [
+      "How do you track where each prospect or client is in your sales pipeline right now?",
+      "What triggers a lead to move from one stage of your pipeline to the next — and is that tracked manually or automatically?",
+      "How do you follow up with leads who didn't convert? Is there a sequence, or is it done ad hoc?",
+      "How often do leads fall through the cracks — and at what stage does that typically happen?",
+      "Do you send automated follow-ups or nurture sequences, or is all follow-up done manually?",
+    ]
+  },
+  {
+    id: "scheduling",
+    title: "Scheduling",
+    icon: "📅",
+    subtitle: "Appointments and booking",
+    questions: [
+      "How do clients currently book appointments or calls with you — is it a scheduling tool, back-and-forth email, or phone?",
+      "What happens after someone books — do they receive reminders, confirmations, or pre-call prep automatically?",
+      "How do you handle rescheduling or cancellations, and how much time does that take per week?",
+      "Do you book offboarding or wrap-up calls with clients, and what does that process look like?",
+      "Are there any appointment types that require specific prep work or documents sent beforehand?",
+    ]
+  },
+  {
+    id: "projects",
+    title: "Projects",
+    icon: "📁",
+    subtitle: "How work gets created and managed",
+    questions: [
+      "When a new project starts, what's the first thing you create — a folder, a task board, a document? Walk me through the setup process.",
+      "Do you use templates for new projects, or is everything built from scratch each time?",
+      "How do you assign tasks and communicate deadlines internally — is there a tool, or is it done via email/chat?",
+      "How do clients receive updates on project progress, and how often?",
+      "What does project handoff or completion look like — what needs to happen before a project is marked done?",
+    ]
+  },
+  {
+    id: "offboarding",
+    title: "Offboarding",
+    icon: "🎯",
+    subtitle: "How clients exit your business",
+    questions: [
+      "What does your offboarding process look like from the moment a project ends to the final goodbye?",
+      "Do you currently ask for testimonials or reviews, and how is that request made?",
+      "How do you handle final invoicing, file delivery, and access revocation when a client leaves?",
+      "Do you have a process for staying in touch with past clients for future work or referrals?",
+      "Are there any offboarding steps that consistently get forgotten or delayed?",
+    ]
+  },
+  {
+    id: "painpoints",
+    title: "Pain Points",
+    icon: "🔥",
+    subtitle: "Your biggest frustrations and goals",
+    questions: [
+      "If you could wave a magic wand and eliminate one task from your business entirely, what would it be?",
+      "What's costing you the most right now — missed leads, employee time, errors, or something else?",
+      "Have you tried to automate anything before? If so, what happened?",
+      "On a scale of 1–10, how tech-savvy is your team, and how open are they to adopting new tools or workflows?",
+      "What does success look like 90 days after we implement automations — what specific outcome matters most?",
+    ]
+  },
+  {
+    id: "review",
+    title: "Review",
+    icon: "✉️",
+    subtitle: "Review and submit",
+    isReview: true,
+  }
+];
+
+let currentSection = 0;
+const answers = {};
+
+function init() {
+  const tabsContainer = document.getElementById("tabsContainer");
+  const mainContent = document.getElementById("mainContent");
+
+  sections.forEach((sec, idx) => {
+    // Tab
+    const tab = document.createElement("button");
+    tab.className = "tab" + (idx === 0 ? " active" : "");
+    tab.id = `tab-${idx}`;
+    tab.innerHTML = `<span class="check"></span>${sec.icon} ${sec.title}`;
+    tab.onclick = () => goTo(idx);
+    tabsContainer.appendChild(tab);
+
+    // Section
+    const div = document.createElement("div");
+    div.className = "section" + (idx === 0 ? " active" : "");
+    div.id = `section-${idx}`;
+
+    if (sec.isInfo) {
+      div.innerHTML = buildInfoSection(sec, idx);
+    } else if (sec.isReview) {
+      div.innerHTML = buildReviewSection(idx);
+    } else {
+      div.innerHTML = buildQSection(sec, idx);
+    }
+
+    mainContent.appendChild(div);
+  });
+
+  updateProgress();
+}
+
+function buildInfoSection(sec, idx) {
+  const gridItems = sec.fields.map(f => `
+    <div class="info-group">
+      <label for="${f.id}">${f.label}</label>
+      <input type="text" id="${f.id}" placeholder="${f.placeholder}" oninput="saveInfo()">
+    </div>
+  `).join("");
+
+  return `
+    <div class="section-header">
+      <div class="section-icon">${sec.icon}</div>
+      <div class="section-title">
+        <h2>${sec.title}</h2>
+        <p>${sec.subtitle}</p>
+      </div>
+    </div>
+    <div class="info-grid">${gridItems}</div>
+    <div class="nav-buttons">
+      <div></div>
+      <button class="btn btn-primary" onclick="goTo(${idx + 1})">Next Section →</button>
+    </div>
+  `;
+}
+
+function buildQSection(sec, idx) {
+  const cards = sec.questions.map((q, qi) => `
+    <div class="question-card">
+      <div class="question-label">
+        <span class="q-number">${qi + 1}</span>
+        <span class="q-text">${q}</span>
+      </div>
+      <textarea 
+        placeholder="Type your answer here..."
+        oninput="saveAnswer('${sec.id}', ${qi}, this.value)"
+        id="ans-${sec.id}-${qi}"
+      ></textarea>
+    </div>
+  `).join("");
+
+  return `
+    <div class="section-header">
+      <div class="section-icon">${sec.icon}</div>
+      <div class="section-title">
+        <h2>${sec.title}</h2>
+        <p>${sec.subtitle}</p>
+      </div>
+    </div>
+    <div class="section-counter">Section <span>${idx}</span> of <span>${sections.length - 2}</span></div>
+    ${cards}
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo(${idx - 1})">← Back</button>
+      <button class="btn btn-primary" onclick="goTo(${idx + 1})">Next Section →</button>
+    </div>
+  `;
+}
+
+function buildReviewSection(idx) {
+  return `
+    <div class="section-header">
+      <div class="section-icon">✉️</div>
+      <div class="section-title">
+        <h2>Review & Submit</h2>
+        <p>Check your answers below, then click Submit to send your responses.</p>
+      </div>
+    </div>
+    <div id="reviewContent"></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo(${idx - 1})">← Back</button>
+      <button class="btn btn-submit" onclick="submitForm()">✉ Submit to Consultant</button>
+    </div>
+  `;
+}
+
+function renderReview() {
+  const container = document.getElementById("reviewContent");
+  if (!container) return;
+
+  let html = "";
+
+  // Client info
+  const infoSec = sections[0];
+  html += `<div class="review-section"><h3>👤 Your Information</h3>`;
+  infoSec.fields.forEach(f => {
+    const val = document.getElementById(f.id)?.value || "";
+    html += `<div class="review-item">
+      <div class="review-q">${f.label}</div>
+      <div class="review-a ${val ? "" : "empty"}">${val || "Not provided"}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Q sections
+  sections.forEach(sec => {
+    if (sec.isInfo || sec.isReview) return;
+    html += `<div class="review-section"><h3>${sec.icon} ${sec.title}</h3>`;
+    sec.questions.forEach((q, qi) => {
+      const val = answers[sec.id]?.[qi] || "";
+      html += `<div class="review-item">
+        <div class="review-q">Q${qi + 1}: ${q.substring(0, 60)}${q.length > 60 ? "..." : ""}</div>
+        <div class="review-a ${val ? "" : "empty"}">${val || "Not answered"}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function saveInfo() {
+  updateProgress();
+}
+
+function saveAnswer(secId, qi, val) {
+  if (!answers[secId]) answers[secId] = {};
+  answers[secId][qi] = val;
+  updateProgress();
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= sections.length) return;
+
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+
+  document.getElementById(`section-${idx}`).classList.add("active");
+  document.getElementById(`tab-${idx}`).classList.add("active");
+
+  currentSection = idx;
+
+  if (sections[idx].isReview) renderReview();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  updateProgress();
+  updateTabs();
+}
+
+function updateProgress() {
+  const totalAnswerable = sections.filter(s => !s.isInfo && !s.isReview)
+    .reduce((sum, s) => sum + s.questions.length, 0);
+  const answered = Object.values(answers).reduce((sum, secAnswers) => {
+    return sum + Object.values(secAnswers).filter(v => v.trim()).length;
+  }, 0);
+  const pct = Math.round((answered / totalAnswerable) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+}
+
+function updateTabs() {
+  sections.forEach((sec, idx) => {
+    if (sec.isInfo || sec.isReview) return;
+    const hasAnswers = sec.questions.some((_, qi) => answers[sec.id]?.[qi]?.trim());
+    const tab = document.getElementById(`tab-${idx}`);
+    if (hasAnswers) {
+      tab.classList.add("completed");
+      tab.querySelector(".check").textContent = "✓ ";
+    }
+  });
+}
+
+function buildEmailBody() {
+  const infoSec = sections[0];
+  let body = "CLIENT DISCOVERY QUESTIONNAIRE RESPONSES\n";
+  body += "==========================================\n\n";
+
+  // Info
+  body += "CLIENT INFORMATION\n------------------\n";
+  infoSec.fields.forEach(f => {
+    const val = document.getElementById(f.id)?.value || "Not provided";
+    body += `${f.label}: ${val}\n`;
+  });
+  body += "\n";
+
+  // Questions
+  sections.forEach(sec => {
+    if (sec.isInfo || sec.isReview) return;
+    body += `${sec.title.toUpperCase()}\n${"─".repeat(sec.title.length)}\n`;
+    sec.questions.forEach((q, qi) => {
+      const val = answers[sec.id]?.[qi] || "Not answered";
+      body += `\nQ${qi + 1}: ${q}\nA: ${val}\n`;
+    });
+    body += "\n";
+  });
+
+  return body;
+}
+
+function collectFormData() {
+  const data = { timestamp: new Date().toISOString() };
+
+  // Collect info fields
+  const infoSec = sections[0];
+  infoSec.fields.forEach(f => {
+    data[f.id] = document.getElementById(f.id)?.value || "";
+  });
+
+  // Collect all question answers
+  sections.forEach(sec => {
+    if (sec.isInfo || sec.isReview) return;
+    sec.questions.forEach((q, qi) => {
+      const key = `${sec.id}_q${qi + 1}`;
+      data[key] = answers[sec.id]?.[qi] || "";
+    });
+  });
+
+  return data;
+}
+
+function setSubmitState(loading) {
+  const btn = document.querySelector(".btn-submit");
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.textContent = loading ? "⏳ Submitting..." : "✉ Submit to Consultant";
+}
+
+async function submitForm() {
+  if (!SCRIPT_URL || SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE") {
+    alert("⚠️ Setup required: Please add your Google Apps Script Web App URL to the SCRIPT_URL variable in the code.");
+    return;
+  }
+
+  setSubmitState(true);
+
+  const formData = collectFormData();
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    // no-cors means we can't read the response, but if fetch didn't throw, assume success
+    document.getElementById("mainContent").style.display = "none";
+    document.querySelector(".tabs-wrapper").style.display = "none";
+    document.getElementById("successMessage").style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+  } catch (err) {
+    console.error("Submission error:", err);
+    alert("Something went wrong submitting the form. Please try again or contact us directly.");
+    setSubmitState(false);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
